@@ -1,0 +1,49 @@
+/* http://css3buttongenerator.com/ */
+
+.btn-blue {
+  background: #3498db;
+  background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
+  background-image: -moz-linear-gradient(top, #3498db, #2980b9);
+  background-image: -ms-linear-gradient(top, #3498db, #2980b9);
+  background-image: -o-linear-gradient(top, #3498db, #2980b9);
+  background-image: linear-gradient(to bottom, #3498db, #2980b9);
+  font-family: Arial;
+  color: #ffffff;
+  font-size: 20px;
+  padding: 10px 20px 10px 20px;
+  text-decoration: none;
+}
+
+.btn-blue:hover {
+  background: #3cb0fd;
+  background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+  text-decoration: none;
+}
+
+.btn-orange {
+  background: #d99a34;
+  background-image: -webkit-linear-gradient(top, #d99a34, #b8782b);
+  background-image: -moz-linear-gradient(top, #d99a34, #b8782b);
+  background-image: -ms-linear-gradient(top, #d99a34, #b8782b);
+  background-image: -o-linear-gradient(top, #d99a34, #b8782b);
+  background-image: linear-gradient(to bottom, #d99a34, #b8782b);
+  font-family: Arial;
+  color: #ffffff;
+  font-size: 20px;
+  padding: 10px 20px 10px 20px;
+  text-decoration: none;
+}
+
+.btn-orange:hover {
+  background: #b8782b;
+  background-image: -webkit-linear-gradient(top, #b8782b, #d99a34);
+  background-image: -moz-linear-gradient(top, #b8782b, #d99a34);
+  background-image: -ms-linear-gradient(top, #b8782b, #d99a34);
+  background-image: -o-linear-gradient(top, #b8782b, #d99a34);
+  background-image: linear-gradient(to bottom, #b8782b, #d99a34);
+  text-decoration: none;
+}

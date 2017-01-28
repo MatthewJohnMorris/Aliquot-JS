@@ -1,4 +1,9 @@
 function myFunction() {
-    alert('Hello, world!!');
+    alert('blue');
 }
+
+function myFunction2() {
+    alert('orange');
+}
+
 
