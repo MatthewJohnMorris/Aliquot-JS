@@ -29,7 +29,10 @@ var SoEPgClass = (function ()
     {
       for (var j = start; j < this.page_size; j += p)
       {
-        this.buf[j >> 5] |= 1 << (j & 31);
+        var j_div_32 = Math.floor(j / 32);
+        var j_mod_32 = j % 32;
+        this.buf[j_div_32] |= 1 << j_mod_32;
+        // this.buf[j >> 5] |= 1 << (j & 31);
       }
     }
                   
@@ -40,7 +43,10 @@ var SoEPgClass = (function ()
                   
     SoEPgClass.prototype.is_composite = function(x)
     {
-      return this.buf[x >> 5] & (1 << (x & 31));
+      var j_div_32 = Math.floor(x / 32);
+      var j_mod_32 = x % 32;
+      return this.buf[j_div_32] & 1 << j_mod_32;
+      // return this.buf[x >> 5] & (1 << (x & 31));
     }
                   
     SoEPgClass.prototype.init_buf = function()
@@ -146,9 +152,9 @@ function calc_primes()
   var elpsd = -new Date().getTime();
   // see https://primes.utm.edu/howmany.html
   // see http://www.umopit.ru/CompLab/primes32eng.htm
-  //  1000000000 ok, should be 50847534 (8ms)
+  //  1000000000 ok, should be 50847534 (11,314ms)
   //  2147483647 ?
-  //  4294967291 not ok, should be 203280220
+  //  4294967291 ok, should be 203280221 (216,090ms)
   // 10000000000 not ok, should be 455052511 	 
   var top_num = 1000000000; // 4294967291; // 2147483647; // 1000000000;
   var cnt = 0;
