@@ -29,7 +29,8 @@ var SoEPgClass = (function ()
     {
       for (var j = start; j < this.page_size; j += p)
       {
-        var j_div_32 = Math.floor(j / 32);
+        // var j_div_32 = Math.floor(j / 32);
+        var j_div_32 = ~~(j/32);
         var j_mod_32 = j % 32;
         this.buf[j_div_32] |= 1 << j_mod_32;
         // this.buf[j >> 5] |= 1 << (j & 31);
@@ -43,7 +44,8 @@ var SoEPgClass = (function ()
                   
     SoEPgClass.prototype.is_composite = function(x)
     {
-      var j_div_32 = Math.floor(x / 32);
+      // var j_div_32 = Math.floor(x / 32);
+      var j_div_32 = ~~(x/32);
       var j_mod_32 = x % 32;
       return this.buf[j_div_32] & 1 << j_mod_32;
       // return this.buf[x >> 5] & (1 << (x & 31));
