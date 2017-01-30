@@ -22,6 +22,7 @@ function myFunction2() {
 
   xhr.onload = function () {
       console.log('LOAD', xhr.readyState);
+      analyze_data(xhr.response);
   };
 
   xhr.onloadstart = function (event) {
@@ -43,8 +44,8 @@ function analyze_data(blob)
     
     myReader.addEventListener("loadend", function(e)
     {
-        var buffer = e.srcElement.result;//arraybuffer object
-       alert('loading complete');
+        var buffer = e.target.result;//arraybuffer object
+       alert('loading complete, length=' + buffer.byteLength);
     });
 }
 
