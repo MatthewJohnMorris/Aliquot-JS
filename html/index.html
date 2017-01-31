@@ -34,8 +34,8 @@ function stopPrimesGeneration() {
   timerPrimesGeneration = undefined;
 }
 
-function ourUpdater(value) {
-  document.getElementById("timer-value").innerHTML = value;
+function ourUpdater(x) {
+  document.getElementById("timer-value").innerHTML = x;
 }
 
 </script>
@@ -61,7 +61,7 @@ class Timer {
     this.updater = funcUpdater;
     this.minion = Timer.createTimer();
     this.minion.onmessage = function(event) {
-      ourUpdater(event.data);
+      funcUpdater(event.data);
     };   
   }
 
