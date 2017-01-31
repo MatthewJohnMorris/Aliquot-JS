@@ -24,49 +24,50 @@
 <script>
 // URL.createObjectURL
 window.URL = window.URL || window.webkitURL;
-var w;
+var timer;
 
-function createWorkerObject() {
+class Timer {
+  constructor() {
+    // "Server response", used in all examples
+    var response = "var i = 0; function timedCount() { i = i + 1; postMessage(i); setTimeout('timedCount()',500); } timedCount();";
 
-  // "Server response", used in all examples
-  var response = "var i = 0; function timedCount() { i = i + 1; postMessage(i); setTimeout('timedCount()',500); } timedCount();";
-
-  var blob;
-  try {
-    blob = new Blob([response], {type: 'application/javascript'});
-  } catch (e) { // Backwards-compatibility
-    window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
-    blob = new BlobBuilder();
-    blob.append(response);
-    blob = blob.getBlob();
+    var blob;
+    try {
+      blob = new Blob([response], {type: 'application/javascript'});
+    } catch (e) { // Backwards-compatibility
+      window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
+      blob = new BlobBuilder();
+      blob.append(response);
+      blob = blob.getBlob();
+    }
+    this.minion = new Worker(URL.createObjectURL(blob));
+    this.minion.onmessage = function(event) {
+      Timer.timerUpdate(event.data);
+    };   
   }
-  w = new Worker(URL.createObjectURL(blob));
-  w.onmessage = function(event) {
-    timerUpdate(event.data);
-  };
-}
 
-function timerUpdate(value) {
-  document.getElementById("timer-value").innerHTML = value;
+  static timerUpdate(value) {
+    document.getElementById("timer-value").innerHTML = value;
+  }
 }
 
 function startWorker() {
   if(typeof(Worker) == "undefined") {
-    timerUpdate("Sorry! No Web Worker support.");
+    Timer.timerUpdate("Sorry! No Web Worker support.");
     return;
   }
-  if(typeof(w) !== "undefined") {
+  if(typeof(timer) !== "undefined") {
     return;
   }
-  createWorkerObject();
+  timer = new Timer();
 }
 
 function stopWorker() {
-  if(typeof(w) == "undefined") {
+  if(typeof(timer) == "undefined") {
     return;
   }
-  w.terminate();
-  w = undefined;
+  timer.terminate();
+  timer = undefined;
 }
 </script>
 
