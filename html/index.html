@@ -7,12 +7,12 @@
 
 <p id="demo" onclick="myFunction()">Click me to run the code.</p>
 
- <script type="text/javascript" src="../src/hello.js"></script>
- <script type="text/javascript" src="../src/primes.js"></script>
+  <script type="text/javascript" src="../src/hello.js"></script>
+  <script type="text/javascript" src="../src/primes.js"></script>
 
- <a class="btn-blue" onclick="calc_primes(); return false;" href="">Click me</a>
+  <a class="btn-blue" onclick="calc_primes(); return false;" href="">Click me</a> 
 
- <a class="btn-orange" onclick="myFunction2(); return false;" href="">Click me</a>
+  <a class="btn-orange" onclick="myFunction2(); return false;" href="">Click me</a>
 
   <p id="calc-primes-result">Result</p>
 
@@ -28,6 +28,13 @@ var timer;
 
 class Timer {
   constructor() {
+    this.minion = Timer.createTimer();
+    this.minion.onmessage = function(event) {
+      Timer.timerUpdate(event.data);
+    };   
+  }
+
+  static createTimer() {
     // "Server response", used in all examples
     var response = "var i = 0; function timedCount() { i = i + 1; postMessage(i); setTimeout('timedCount()',500); } timedCount();";
 
@@ -40,33 +47,38 @@ class Timer {
       blob.append(response);
       blob = blob.getBlob();
     }
-    this.minion = new Worker(URL.createObjectURL(blob));
-    this.minion.onmessage = function(event) {
-      Timer.timerUpdate(event.data);
-    };   
+    return new Worker(URL.createObjectURL(blob));
   }
 
   static timerUpdate(value) {
     document.getElementById("timer-value").innerHTML = value;
   }
+
+  static start() {
+    if(typeof(Worker) == "undefined") {
+      Timer.timerUpdate("Sorry! No Web Worker support.");
+      return;
+    }
+    return new Timer();
+  }
+
+  static stop() {
+    timer.minion.terminate();
+  } 
 }
 
 function startWorker() {
-  if(typeof(Worker) == "undefined") {
-    Timer.timerUpdate("Sorry! No Web Worker support.");
-    return;
-  }
   if(typeof(timer) !== "undefined") {
     return;
   }
-  timer = new Timer();
+  timer = Timer.start();
 }
 
 function stopWorker() {
   if(typeof(timer) == "undefined") {
     return;
   }
-  timer.terminate();
+  Timer.stop();
   timer = undefined;
 }
 </script>
