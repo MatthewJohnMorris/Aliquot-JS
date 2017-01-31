@@ -16,6 +16,60 @@
 
   <p id="calc-primes-result">Result</p>
 
+  <p id="timer-value">Timer</p>
+
+<button onclick="startWorker()">Start Worker</button>
+<button onclick="stopWorker()">Stop Worker</button>
+
+<script>
+// URL.createObjectURL
+window.URL = window.URL || window.webkitURL;
+var w;
+
+function createWorkerObject() {
+
+  // "Server response", used in all examples
+  var response = "var i = 0; function timedCount() { i = i + 1; postMessage(i); setTimeout('timedCount()',500); } timedCount();";
+
+  var blob;
+  try {
+    blob = new Blob([response], {type: 'application/javascript'});
+  } catch (e) { // Backwards-compatibility
+    window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
+    blob = new BlobBuilder();
+    blob.append(response);
+    blob = blob.getBlob();
+  }
+  w = new Worker(URL.createObjectURL(blob));
+  w.onmessage = function(event) {
+    timerUpdate(event.data);
+  };
+}
+
+function timerUpdate(value) {
+  document.getElementById("timer-value").innerHTML = value;
+}
+
+function startWorker() {
+  if(typeof(Worker) == "undefined") {
+    timerUpdate("Sorry! No Web Worker support.");
+    return;
+  }
+  if(typeof(w) !== "undefined") {
+    return;
+  }
+  createWorkerObject();
+}
+
+function stopWorker() {
+  if(typeof(w) == "undefined") {
+    return;
+  }
+  w.terminate();
+  w = undefined;
+}
+</script>
+
 </body>
 </html>
 
