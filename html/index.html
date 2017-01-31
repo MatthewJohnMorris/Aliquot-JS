@@ -26,23 +26,28 @@ function startPrimesGeneration() {
   if(typeof(timerPrimesGeneration) !== "undefined") {
     return;
   }
-  timerPrimesGeneration = Timer.start("timer-value");
+  timerPrimesGeneration = Timer.start(ourUpdater);
 }
 
 function stopPrimesGeneration() {
   Timer.stop(timerPrimesGeneration);
   timerPrimesGeneration = undefined;
 }
+
+function ourUpdater(value) {
+  document.getElementById("timer-value").innerHTML = value;
+}
+
 </script>
 
 <script>
 class Timer {
-  static start(targetName) {
+  static start(updater) {
     if(typeof(Worker) == "undefined") {
       Timer.timerUpdate(targetName, "Sorry! No Web Worker support.");
       return;
     }
-    return new Timer(targetName);
+    return new Timer(updater);
   }
 
   static stop(x) {
@@ -52,11 +57,11 @@ class Timer {
     x.minion.terminate();
   } 
 
-  constructor(targetName) {
-    this.targetName = targetName;
+  constructor(funcUpdater) {
+    this.updater = funcUpdater;
     this.minion = Timer.createTimer();
     this.minion.onmessage = function(event) {
-      Timer.timerUpdate(targetName, event.data);
+      ourUpdater(event.data);
     };   
   }
 
@@ -76,10 +81,6 @@ class Timer {
     // URL.createObjectURL
     window.URL = window.URL || window.webkitURL;
     return new Worker(URL.createObjectURL(blob));
-  }
-
-  static timerUpdate(name, value) {
-    document.getElementById(name).innerHTML = value;
   }
 }
 
