@@ -23,18 +23,21 @@ class Timer {
   }
 
   static createTimer() {
-    // "Server response", used in all examples
-    var response = "var i = 0; function timedCount() { i = i + 1; postMessage(i); setTimeout('timedCount()',500); } timedCount();";
+
+    // Send an increment every 0.5s
+    var script = "var i = 0; function timedCount() { i = i + 1; postMessage(i); setTimeout('timedCount()',500); } timedCount();";
 
     var blob;
     try {
-      blob = new Blob([response], {type: 'application/javascript'});
-    } catch (e) { // Backwards-compatibility
+      blob = new Blob([script], {type: 'application/javascript'});
+    } catch (e) {
+      // Backwards-compatibility
       window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
       blob = new BlobBuilder();
-      blob.append(response);
+      blob.append(script);
       blob = blob.getBlob();
     }
+
     // URL.createObjectURL
     window.URL = window.URL || window.webkitURL;
     return new Worker(URL.createObjectURL(blob));
