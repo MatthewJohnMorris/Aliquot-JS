@@ -16,13 +16,17 @@ class Timer {
 
   constructor(funcUpdater) {
     this.updater = funcUpdater;
-    this.minion = Timer.createTimer();
+    this.minion = Timer.createPrimesRunner();
     this.minion.onmessage = function(event) {
       funcUpdater(event.data);
     };   
   }
 
-  static createTimer() {
+  static createPrimesRunner() {
+    return new Worker('primes-runner.js');
+  }
+
+  static createScriptTimer() {
 
     // Send an increment every 0.5s
     var script = "var i = 0; function timedCount() { i = i + 1; postMessage(i); setTimeout('timedCount()',500); } timedCount();";

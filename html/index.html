@@ -2,6 +2,7 @@
 <html>
 <head>
   <link rel="stylesheet" href="../css/buttons.css" />
+  <link rel="stylesheet" href="../css/progress.css" />
 </head>
 <body>
 
@@ -18,6 +19,12 @@
   <p id="calc-primes-result">Result</p>
 
   <p id="timer-value">Timer</p>
+
+<div class="progress-back">
+  <div class="progress-bar" id="progress-bar">
+    <div class="progress-label" id="progress-label"></div>
+  </div>
+</div>
 
 <button onclick="startPrimesGeneration()">Start Primes Generation</button>
 <button onclick="stopPrimesGeneration()">Stop Primes Generation</button>
@@ -36,7 +43,13 @@ function stopPrimesGeneration() {
 }
 
 function ourUpdater(x) {
-  document.getElementById("timer-value").innerHTML = x;
+    var elem = document.getElementById("progress-bar");
+    var percent = x.percent;
+    elem.style.width = percent + '%';
+    var message = x.percent + "%: found " + x.cnt;
+    document.getElementById("progress-label").innerHTML = message;
+
+//  document.getElementById("timer-value").innerHTML = x;
 }
 </script>
 
