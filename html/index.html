@@ -46,7 +46,7 @@ function ourUpdater(x) {
     var elem = document.getElementById("progress-bar");
     var percent = x.percent;
     elem.style.width = percent + '%';
-    var message = x.percent + "%: found " + x.cnt;
+    var message = x.percent + "%: src: " + x.elapsed + ", lowi: " + x.lowi + ", found: " + x.cnt;
     document.getElementById("progress-label").innerHTML = message;
 
 //  document.getElementById("timer-value").innerHTML = x;
