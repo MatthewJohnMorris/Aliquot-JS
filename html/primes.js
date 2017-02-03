@@ -43,7 +43,10 @@ var SoEPgClass = (function ()
       }
       return s;
     }
-                  
+
+
+    // This is the heart of our primes generation - more than 50% of runtime
+    // is spent here.                 
     SoEPgClass.prototype.cull = function (start, p)
     {
       // Our representation automatically skips multiples of 2
@@ -183,7 +186,7 @@ function calc_primes()
   //  2147483647 ?
   //  4294967291 ok, should be 203280221 (216,090ms)
   // 10000000000 not ok, should be 455052511 	 
-  var top_num = 4294967291; // 4294967291; // 2147483647; // 1000000000;
+  var top_num = 1000000000; // 4294967291; // 2147483647; // 1000000000;
   var cnt = 0;
   for(var i = 0; i < 64; i++)
   {
