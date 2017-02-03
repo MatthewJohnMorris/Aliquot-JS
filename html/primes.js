@@ -11,7 +11,13 @@ var SoEPgClass = (function ()
                   
     SoEPgClass.prototype.get_sq_start_index = function(p)
     {
-      var s = (p * p - 3) / 2; //compute the start index of the prime squared
+      // Not getting this bit!
+      // next() has 3 + 2 * (lowi, page_size)
+      // s is aparently intended to be in index space
+      // via s = (p*p - 3) / 2
+      // but then it's modularised by p, also p is added to it in "cull()"
+      
+      var s = (p * p - 3) / 2; // compute the start index of the prime squared
       if (s >= this.lowi) // adjust start index based on page lower limit...
       {
         s -= this.lowi;
@@ -30,10 +36,10 @@ var SoEPgClass = (function ()
       for (var j = start; j < this.page_size; j += p)
       {
         // var j_div_32 = Math.floor(j / 32);
-        var j_div_32 = ~~(j/32);
-        var j_mod_32 = j % 32;
-        this.buf[j_div_32] |= 1 << j_mod_32;
-        // this.buf[j >> 5] |= 1 << (j & 31);
+        // var j_div_32 = ~~(j/32);
+        // var j_mod_32 = j % 32;
+        // this.buf[j_div_32] |= 1 << j_mod_32;
+        this.buf[j >> 5] |= 1 << (j & 31);
       }
     }
                   
@@ -45,10 +51,10 @@ var SoEPgClass = (function ()
     SoEPgClass.prototype.is_composite = function(x)
     {
       // var j_div_32 = Math.floor(x / 32);
-      var j_div_32 = ~~(x/32);
-      var j_mod_32 = x % 32;
-      return this.buf[j_div_32] & 1 << j_mod_32;
-      // return this.buf[x >> 5] & (1 << (x & 31));
+      // var j_div_32 = ~~(x/32);
+      // var j_mod_32 = x % 32;
+      // return this.buf[j_div_32] & 1 << j_mod_32;
+      return this.buf[x >> 5] & (1 << (x & 31));
     }
                   
     SoEPgClass.prototype.init_buf = function()
@@ -99,7 +105,7 @@ var SoEPgClass = (function ()
     SoEPgClass.prototype.init_page = function()
     {
       // bi must be zero:
-      var nxt = 3 + 2 * this.lowi + 2 * this.page_size; //just beyond the current page
+      var nxt = 3 + 2 * (this.lowi + this.page_size); //just beyond the current page
       this.init_buf();
       if (this.lowi <= 0)
       {

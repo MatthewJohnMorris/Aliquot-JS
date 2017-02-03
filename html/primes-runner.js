@@ -20,10 +20,12 @@ while ((p = gen.next()) <= top_num) {
   if(cnt % 100000 == 0) {
     var percent = Math.floor(100 * p / top_num);
     var elapsed = Math.floor(((new Date()).getTime() - timeStart) / 1000);
-    postMessage({lowi: gen.lowi, elapsed:elapsed, cnt:cnt, percent:percent, top_num:top_num, p:p});
+    var is_big = (2147483647 < gen.lowi*2);
+    postMessage({is_big: is_big, lowi: gen.lowi, elapsed:elapsed, cnt:cnt, percent:percent, top_num:top_num, p:p});
   }
 }
 var percent = Math.floor(100 * p / top_num);
 var elapsed = Math.floor(((new Date()).getTime() - timeStart) / 1000);
-postMessage({lowi: gen.lowi, elapsed:elapsed, cnt:cnt, percent:percent, top_num:top_num, p:p});
+var is_big = (2147483647 < gen.lowi*2);
+postMessage({is_big: is_big, lowi: gen.lowi, elapsed:elapsed, cnt:cnt, percent:percent, top_num:top_num, p:p});
 

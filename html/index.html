@@ -12,7 +12,7 @@
   <script type="text/javascript" src="../src/primes.js"></script>
   <script type="text/javascript" src="../src/timer.js"></script>
 
-  <a class="btn-blue" onclick="calc_primes(); return false;" href="">Click me</a> 
+  <a class="btn-blue" onclick="calc_primes(); return false;" href="">Test Primes Calc</a> 
 
   <a class="btn-orange" onclick="myFunction2(); return false;" href="">Click me</a>
 
@@ -46,7 +46,7 @@ function ourUpdater(x) {
     var elem = document.getElementById("progress-bar");
     var percent = x.percent;
     elem.style.width = percent + '%';
-    var message = x.percent + "%: src: " + x.elapsed + ", lowi: " + x.lowi + ", found: " + x.cnt;
+    var message = x.percent + "%: big: " + x.is_big + " sec: " + x.elapsed + ", lowi: " + x.lowi + ", found: " + x.cnt;
     document.getElementById("progress-label").innerHTML = message;
 
 //  document.getElementById("timer-value").innerHTML = x;
