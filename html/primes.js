@@ -3,7 +3,10 @@ var SoEPgClass = (function ()
     function SoEPgClass()
     {
       this.page_index = -1; // constructor resets the enumeration to start...
-      this.page_size = 131072; // 131072 = 2 * 32 * 2048;
+      this.page_slots = 2048;
+      // We only consider odd numbers (hence the factor of 2)
+      // We're using a bitwise index on 32-bit numbers (hence the factor of 32)
+      this.page_size = 2 * 32 * this.page_slots;
       this.lowi = 0; // other initialization done here...
       this.found_primes = [];
       this.fast = 1;
@@ -11,20 +14,17 @@ var SoEPgClass = (function ()
                   
     SoEPgClass.prototype.get_sq_start_index = function(p)
     {
-      // Not getting this bit!
-      // next() has 3 + 2 * (lowi, page_size)
-      // s is aparently intended to be in index space
-      // via s = (p*p - 3) / 2
-      // but then it's modularised by p, also p is added to it in "cull()"
-      
-      var s = (p * p - 3) / 2; // compute the start index of the prime squared
-      if (s >= this.lowi) // adjust start index based on page lower limit...
+      // get index for s      
+      var s = (p * p - 3) / 2;
+
+      if (s >= this.lowi)
       {
+        // if s is in this page, get page-relative index by simply subtracting page lower limit
         s -= this.lowi;
       }
       else
       {
-        // for the case where this isn't the first prime squared instance
+        // otherwise, adjust for s in relation to page lower limit
         var r = (this.lowi - s) % p;
         s = (r != 0) ? p - r : 0;
       }
@@ -33,12 +33,10 @@ var SoEPgClass = (function ()
                   
     SoEPgClass.prototype.cull = function (start, p)
     {
+      // Our representation automatically skips multiples of 2
+      // So to go for the next multiple of p, we only need to move by p, not 2*p
       for (var j = start; j < this.page_size; j += p)
       {
-        // var j_div_32 = Math.floor(j / 32);
-        // var j_div_32 = ~~(j/32);
-        // var j_mod_32 = j % 32;
-        // this.buf[j_div_32] |= 1 << j_mod_32;
         this.buf[j >> 5] |= 1 << (j & 31);
       }
     }
@@ -50,17 +48,13 @@ var SoEPgClass = (function ()
                   
     SoEPgClass.prototype.is_composite = function(x)
     {
-      // var j_div_32 = Math.floor(x / 32);
-      // var j_div_32 = ~~(x/32);
-      // var j_mod_32 = x % 32;
-      // return this.buf[j_div_32] & 1 << j_mod_32;
       return this.buf[x >> 5] & (1 << (x & 31));
     }
                   
     SoEPgClass.prototype.init_buf = function()
     {
       this.buf = [];
-      for (var i = 0; i < 2048; i++)
+      for (var i = 0; i < this.page_slots; i++)
       {
         this.buf.push(0);
       }
@@ -68,7 +62,8 @@ var SoEPgClass = (function ()
 
     SoEPgClass.prototype.init_zeroth_page = function(nxt)
     {
-      // special culling for first page as no base primes yet:
+      // Special culling for first page as no base primes yet
+      // The value for i is p = 3 + (i * 2)
       for (var i = 0, p = 3, sqr = 9; sqr < nxt; i++, p += 2, sqr = p * p)
       {
         if(this.is_composite(i) === 0)
@@ -80,23 +75,31 @@ var SoEPgClass = (function ()
 
     SoEPgClass.prototype.init_normal_page = function(nxt)
     {
+      // If this is the first page after the zero one
       if (!this.found_primes.length)
       {
-        // if this is the first page after the zero one:
-        this.prime_stream = new SoEPgClass(); // initialize separate base primes stream:
-        this.prime_stream.next(); // advance past the only even prime of 2
-        this.found_primes.push(this.prime_stream.next()); // keep the next prime (3 in this case)
+        // Initialise a generator of base primes - another instance of this class!
+        // Our generator will know about all primes up to 131072 without having to
+        // spawn its own generator, so it's not *quite* turtles all the way down.
+        // The first next() moves past 2, which we don't want.
+        // The second next() yields 3, which we do want to keep.
+        this.prime_stream = new SoEPgClass();
+        this.prime_stream.next();
+        this.found_primes.push(this.prime_stream.next());
       }
-      // get enough base primes for the page range...
+
+      // Get enough base primes for the page range.
+      // We don't need to worry about any primes > sqrt(nxt) for primality testing purposes.
       var p1 = this.found_primes[this.found_primes.length - 1];
       while(p1 * p1 < nxt)
       {
         p1 = this.prime_stream.next();
         this.found_primes.push(p1);
       }
+
+      // Cull all our primes from our new page.
       for (var i = 0; i < this.found_primes.length; i++)
       {
-        // for each base prime in the array
         var p = this.found_primes[i];
         this.cull_prime(p);
       }
@@ -104,8 +107,10 @@ var SoEPgClass = (function ()
 
     SoEPgClass.prototype.init_page = function()
     {
-      // bi must be zero:
-      var nxt = 3 + 2 * (this.lowi + this.page_size); //just beyond the current page
+      // Get the number just beyond the current page.
+      var nxt = 3 + 2 * (this.lowi + this.page_size);
+
+      // Initialise our new page.
       this.init_buf();
       if (this.lowi <= 0)
       {
@@ -164,7 +169,7 @@ function calc_primes()
   //  2147483647 ?
   //  4294967291 ok, should be 203280221 (216,090ms)
   // 10000000000 not ok, should be 455052511 	 
-  var top_num = 1000000000; // 4294967291; // 2147483647; // 1000000000;
+  var top_num = 10000000000; // 4294967291; // 2147483647; // 1000000000;
   var cnt = 0;
   for(var i = 0; i < 64; i++)
   {

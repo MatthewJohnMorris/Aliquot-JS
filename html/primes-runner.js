@@ -7,7 +7,7 @@
 
 importScripts('primes.js');
 
-var top_num = 4294967291; // 1000000000; // 4294967291; // 2147483647; // 1000000000;
+var top_num = 10000000000; // 1000000000; // 4294967291; // 2147483647; // 1000000000;
 var cnt = 0;
 var timeStart = new Date().getTime();
 
