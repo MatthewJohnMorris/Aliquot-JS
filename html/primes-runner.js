@@ -17,15 +17,15 @@ var gen = new SoEPgClass();
 var p = 1;
 while ((p = gen.next()) <= top_num) {
   cnt++;
-  if(cnt % 100000 == 0) {
+  if(cnt % 1000000 == 0) {
     var percent = Math.floor(100 * p / top_num);
     var elapsed = Math.floor(((new Date()).getTime() - timeStart) / 1000);
     var is_big = (2147483647 < gen.lowi*2);
-    postMessage({is_big: is_big, lowi: gen.lowi, elapsed:elapsed, cnt:cnt, percent:percent, top_num:top_num, p:p});
+    postMessage({is_big: is_big, lowi: gen.page_index_start, elapsed:elapsed, cnt:cnt, percent:percent, top_num:top_num, p:p});
   }
 }
 var percent = Math.floor(100 * p / top_num);
 var elapsed = Math.floor(((new Date()).getTime() - timeStart) / 1000);
 var is_big = (2147483647 < gen.lowi*2);
-postMessage({is_big: is_big, lowi: gen.lowi, elapsed:elapsed, cnt:cnt, percent:percent, top_num:top_num, p:p});
+postMessage({is_big: is_big, lowi: gen.page_index_start, elapsed:elapsed, cnt:cnt, percent:percent, top_num:top_num, p:p});
 

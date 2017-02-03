@@ -2,14 +2,27 @@ var SoEPgClass = (function ()
   {
     function SoEPgClass()
     {
-      this.page_index = -1; // constructor resets the enumeration to start...
-      this.page_slots = 2048;
+      // How far are we along the current page?
+      this.page_index = -1;
+
+      // Index at start of current page
+      this.page_index_start = 0;
+
+      // Some tests on generating primes up to 10,000,000,000
+      // 32768 -> 90s
+      // 16384 -> 91s
+      //  8192 -> 91s
+      //  4096 -> 97s
+      //  2048 -> 107s
+      this.page_slots = 8192;
+
       // We only consider odd numbers (hence the factor of 2)
       // We're using a bitwise index on 32-bit numbers (hence the factor of 32)
+      // We're limited to 32 bits because Javascript.
       this.page_size = 2 * 32 * this.page_slots;
-      this.lowi = 0; // other initialization done here...
-      this.found_primes = [];
-      this.fast = 1;
+
+      // Generated primes from our base stream - use for page culling
+      this.base_primes = [];
     }
                   
     SoEPgClass.prototype.get_sq_start_index = function(p)
@@ -17,15 +30,15 @@ var SoEPgClass = (function ()
       // get index for s      
       var s = (p * p - 3) / 2;
 
-      if (s >= this.lowi)
+      if (s >= this.page_index_start)
       {
         // if s is in this page, get page-relative index by simply subtracting page lower limit
-        s -= this.lowi;
+        s -= this.page_index_start;
       }
       else
       {
         // otherwise, adjust for s in relation to page lower limit
-        var r = (this.lowi - s) % p;
+        var r = (this.page_index_start - s) % p;
         s = (r != 0) ? p - r : 0;
       }
       return s;
@@ -53,10 +66,10 @@ var SoEPgClass = (function ()
                   
     SoEPgClass.prototype.init_buf = function()
     {
-      this.buf = [];
-      for (var i = 0; i < this.page_slots; i++)
+      this.buf = new Array(this.page_slots); 
+      for(var i = 0; i < this.page_slots; i++)
       {
-        this.buf.push(0);
+        this.buf[i] = 0;
       }
     }
 
@@ -76,7 +89,7 @@ var SoEPgClass = (function ()
     SoEPgClass.prototype.init_normal_page = function(nxt)
     {
       // If this is the first page after the zero one
-      if (!this.found_primes.length)
+      if (!this.base_primes.length)
       {
         // Initialise a generator of base primes - another instance of this class!
         // Our generator will know about all primes up to 131072 without having to
@@ -85,22 +98,22 @@ var SoEPgClass = (function ()
         // The second next() yields 3, which we do want to keep.
         this.prime_stream = new SoEPgClass();
         this.prime_stream.next();
-        this.found_primes.push(this.prime_stream.next());
+        this.base_primes.push(this.prime_stream.next());
       }
 
       // Get enough base primes for the page range.
       // We don't need to worry about any primes > sqrt(nxt) for primality testing purposes.
-      var p1 = this.found_primes[this.found_primes.length - 1];
+      var p1 = this.base_primes[this.base_primes.length - 1];
       while(p1 * p1 < nxt)
       {
         p1 = this.prime_stream.next();
-        this.found_primes.push(p1);
+        this.base_primes.push(p1);
       }
 
       // Cull all our primes from our new page.
-      for (var i = 0; i < this.found_primes.length; i++)
+      for (var i = 0; i < this.base_primes.length; i++)
       {
-        var p = this.found_primes[i];
+        var p = this.base_primes[i];
         this.cull_prime(p);
       }
     }
@@ -108,11 +121,11 @@ var SoEPgClass = (function ()
     SoEPgClass.prototype.init_page = function()
     {
       // Get the number just beyond the current page.
-      var nxt = 3 + 2 * (this.lowi + this.page_size);
+      var nxt = 3 + 2 * (this.page_index_start + this.page_size);
 
       // Initialise our new page.
       this.init_buf();
-      if (this.lowi <= 0)
+      if (this.page_index_start <= 0)
       {
         this.init_zeroth_page(nxt);
       }
@@ -124,6 +137,7 @@ var SoEPgClass = (function ()
                   
     SoEPgClass.prototype.next = function ()
     {
+      // Special case - get 2 out of the way before our paging system kicks in.
       if (this.page_index < 0)
       {
         this.page_index = 0;
@@ -142,7 +156,7 @@ var SoEPgClass = (function ()
         {
           if(this.is_composite(this.page_index) === 0)
           {
-            var next_prime = 3 + ((this.lowi + this.page_index) * 2);
+            var next_prime = 3 + ((this.page_index_start + this.page_index) * 2);
             this.page_index++;
             return next_prime;
           }
@@ -151,7 +165,7 @@ var SoEPgClass = (function ()
                   
         // beyond buffer range: advance buffer
         this.page_index = 0;
-        this.lowi += this.page_size;
+        this.page_index_start += this.page_size;
       }
     };
                   
