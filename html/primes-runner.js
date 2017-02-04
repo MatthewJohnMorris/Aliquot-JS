@@ -7,7 +7,7 @@
 
 importScripts('primes.js');
 
-var top_num = 1000000000; // 1000000000; // 4294967291; // 2147483647; // 1000000000;
+var top_num = 4294967291; // 1000000000; // 4294967291; // 2147483647; // 1000000000;
 var cnt = 0;
 var timeStart = new Date().getTime();
 
@@ -68,7 +68,7 @@ function writeToDb() {
     var objectStore = db.transaction("primes").objectStore("primes");
     var reqCursor = objectStore.openCursor();
     reqCursor.onsuccess = function(event) {
-      var cursor = event.target.result;
+      var cursor = reqCursor.result || event.result; // event.target.result;
       if (cursor) {
         console.log("Got cursorValue: " + cursor.value.length);
         cursor.continue();
@@ -80,6 +80,21 @@ function writeToDb() {
     reqCursor.onerror = function(event) {
       console.log("Cursor error: " + event.target.error.name + ": " + event.target.error.message);
     };
+    reqCursor.oncomplete = function(event) {
+      console.log("Cursor oncomplete");
+    }
+    reqCursor.onabort = function(event) {
+      console.log("Cursor onabort"); 
+    }
+    reqCursor.onblocked = function(event) {
+      console.log("Cursor onblocked");
+    }
+    reqCursor.onversionchange = function(event) {
+      console.log("Cursor onversionchange");
+    }
+    reqCursor.onclose = function(event) {
+      console.log("Cursor onclose");
+    }
     console.log("Issued openCursor() for database '" + databaseName + "'");
 
 /*
