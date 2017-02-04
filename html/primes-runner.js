@@ -66,6 +66,24 @@ function writeToDb() {
     console.log("Issued put for database '" + databaseName + "'");
 
     var objectStore = db.transaction("primes").objectStore("primes");
+    var reqCursor = objectStore.openCursor();
+    reqCursor.onsuccess = function(event) {
+      var cursor = event.target.result;
+      if (cursor) {
+        console.log("Got cursorValue: " + cursor.value.length);
+        cursor.continue();
+      }
+      else {
+        console.log("Got all cursorValues");
+      }
+    };
+    reqCursor.onerror = function(event) {
+      console.log("Cursor error: " + event.target.error.name + ": " + event.target.error.message);
+    };
+    console.log("Issued openCursor() for database '" + databaseName + "'");
+
+/*
+    var objectStore = db.transaction("primes").objectStore("primes");
     var cursorValues = [];
     var reqCursor = objectStore.openCursor();
     reqCursor.onsuccess = function(event) {
@@ -83,7 +101,7 @@ function writeToDb() {
       console.log("Cursor error: " + event.target.error.name + ": " + event.target.error.message);
     };
     console.log("Issued openCursor() for database '" + databaseName + "'");
-
+*/
   };
   request.onupgradeneeded = function(event) { 
     var dbUpgrade = event.target.result;
