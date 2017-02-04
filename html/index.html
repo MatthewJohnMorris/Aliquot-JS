@@ -11,10 +11,13 @@
   <script type="text/javascript" src="../src/hello.js"></script>
   <script type="text/javascript" src="../src/primes.js"></script>
   <script type="text/javascript" src="../src/timer.js"></script>
+  <script type="text/javascript" src="../src/db.js"></script>
 
-  <a class="btn-blue" onclick="calc_primes(); return false;" href="">Test Primes Calc</a> 
+  <a class="btn-blue" onclick="dbOpen(); return false;" href="">Open DB</a> 
 
-  <a class="btn-orange" onclick="myFunction2(); return false;" href="">Click me</a>
+  <a class="btn-blue" onclick="dbClose(); return false;" href="">Close DB</a> 
+
+  <a class="btn-orange" onclick="dbDelete(); return false;" href="">Delete DB</a>
 
   <p id="calc-primes-result">Result</p>
 
@@ -46,7 +49,7 @@ function ourUpdater(x) {
     var elem = document.getElementById("progress-bar");
     var percent = x.percent;
     elem.style.width = percent + '%';
-    var message = x.percent + "%: big: " + x.is_big + " sec: " + x.elapsed + ", lowi: " + x.lowi + ", found: " + x.cnt;
+    var message = x.percent + "% sec: " + x.elapsed + " found: " + x.cnt;
     document.getElementById("progress-label").innerHTML = message;
 
 //  document.getElementById("timer-value").innerHTML = x;
