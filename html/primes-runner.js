@@ -7,15 +7,25 @@
 
 importScripts('primes.js');
 
-var top_num = 1000; // 1000000000; // 4294967291; // 2147483647; // 1000000000;
+var top_num = 1000000000; // 1000000000; // 4294967291; // 2147483647; // 1000000000;
 var cnt = 0;
 var timeStart = new Date().getTime();
 
 postMessage('initialising: top_num = ' + top_num);
 
-var gen = new SoEPgClass();
+var results;
+var cntLast = 0;
+for(var indic = 0; indic < 2; indic++) {
+  if(indic === 1) {
+     results = new Uint32Array(cnt);
+  }
 var p = 1;
+cnt = 0;
+var gen = new SoEPgClass();
 while ((p = gen.next()) <= top_num) {
+  if(indic === 1) {
+    results[cnt] = p;
+  }
   cnt++;
   if(cnt % 1000000 == 0) {
     var percent = Math.floor(100 * p / top_num);
@@ -28,6 +38,7 @@ var percent = Math.floor(100 * p / top_num);
 var elapsed = Math.floor(((new Date()).getTime() - timeStart) / 1000);
 var is_big = (2147483647 < gen.lowi*2);
 postMessage({is_big: is_big, lowi: gen.page_index_start, elapsed:elapsed, cnt:cnt, percent:percent, top_num:top_num, p:p});
+}
 
 dbDelete();
 writeToDb();
@@ -43,31 +54,36 @@ function writeToDb() {
     console.log("created database '" + databaseName + "'");
     var transaction = db.transaction(["primes"], "readwrite");
 
-    var primesArray = new Uint32Array(5);
-    primesArray[0] = 2;
-    primesArray[1] = 3;
-    primesArray[2] = 5;
-    primesArray[3] = 7;
-    primesArray[4] = 11;
-    var putReq = transaction.objectStore("primes").put(primesArray);
+    console.log("Results length: " + results.length);
+
+    var putReq = transaction.objectStore("primes").put(results);
     putReq.onsuccess = function(event) {
       console.log("Put result: " + event.target.result);
     };
-
-    console.log("stored data in database '" + databaseName + "'");
+    putReq.onerror = function(event) {
+      console.log("Put error: " + event.target.error.name + ": " + event.target.error.message);
+    };
+    console.log("Issued put for database '" + databaseName + "'");
 
     var objectStore = db.transaction("primes").objectStore("primes");
-    var customers = [];
-    objectStore.openCursor().onsuccess = function(event) {
+    var cursorValues = [];
+    var reqCursor = objectStore.openCursor();
+    reqCursor.onsuccess = function(event) {
       var cursor = event.target.result;
       if (cursor) {
-        customers.push(cursor.value);
+        console.log("Got cursorValue: " + cursor.value);
+        cursorValues.push(cursor.value);
         cursor.continue();
       }
       else {
-        console.log("Got all customers: " + customers);
+        console.log("Got all cursorValues, count: " + cursorValues[0].length);
       }
     };
+    reqCursor.onerror = function(event) {
+      console.log("Cursor error: " + event.target.error.name + ": " + event.target.error.message);
+    };
+    console.log("Issued openCursor() for database '" + databaseName + "'");
+
   };
   request.onupgradeneeded = function(event) { 
     var dbUpgrade = event.target.result;
