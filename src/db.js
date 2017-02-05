@@ -94,13 +94,26 @@ function dbClose() {
 function dbDelete() {
   var req = indexedDB.deleteDatabase(databaseName);
   req.onsuccess = function () {
-    console.log("Deleted database  '" + databaseName + "' successfully");
+    console.log("onsuccess: deleteDatabase(" + databaseName + ")");
   };
   req.onerror = function () {
-    console.log("Couldn't delete database '" + databaseName + "'");
+    console.log("onerror: deleteDatabase(" + databaseName + ")");
   };
   req.onblocked = function () {
-    console.log("Couldn't delete database '" + databaseName + "' due to the operation being blocked");
+    console.log("onblocked: deleteDatabase(" + databaseName + ")");
   };
+  reqCursor.oncomplete = function(event) {
+    console.log("oncomplete: deleteDatabase(" + databaseName + ")");
+  }
+  reqCursor.onabort = function(event) {
+    console.log("onabort: deleteDatabase(" + databaseName + ")");
+  }
+  reqCursor.onversionchange = function(event) {
+    console.log("onversionchange: deleteDatabase(" + databaseName + ")");
+  }
+  reqCursor.onclose = function(event) {
+    console.log("onclose: deleteDatabase(" + databaseName + ")");
+  }
+  console.log("Issued deleteDatabase() for database '" + databaseName + "'");
 }
 
