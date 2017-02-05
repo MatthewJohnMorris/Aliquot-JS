@@ -13,7 +13,7 @@ var timeStart = new Date().getTime();
 var p = 1;
 var cnt = 0;
 var resultsIndex = 0;
-var resultsBufSize = 131072; // 8192, 59 // 16384; // 65536, 53;
+var resultsBufSize = 131072; // 8192, 59 // 16384; // 65536, 53; // 131072, 56
 var resultsBuffer = new Uint32Array(resultsBufSize);
 
 var gen = new SoEPgClass();
