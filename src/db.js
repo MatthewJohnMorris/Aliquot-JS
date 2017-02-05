@@ -1,5 +1,7 @@
 var databaseName = "MyTestDatabase";
 var db;
+var dbPutsIssued = 0;
+var dbPutsCompleted = 0;
 
 function dbCreateOrOpen() {
   var request = indexedDB.open(databaseName, 1);
@@ -8,6 +10,8 @@ function dbCreateOrOpen() {
   };
   request.onsuccess = function(event) {
     db = event.target.result;
+    dbPutsIssued = 0;
+    dbPutsCompleted = 0;
     console.log("opened database '" + databaseName + "'");
   };
   request.onupgradeneeded = function(event) { 
@@ -22,27 +26,50 @@ function dbStore(resultsValues, resultsCount) {
 
     var transactionPrimesValues = db.transaction(["primes.values"], "readwrite");
     var transactionPrimesCounts = db.transaction(["primes.counts"], "readwrite");
-
     var putReqValues = transactionPrimesValues.objectStore("primes.values").put(resultsValues);
     putReqValues.onsuccess = function(event) {
+      dbPutsCompleted++;
       //   console.log("putReqValues result: " + event.target.result);
+      if(dbPutsCompleted === dbPutsIssued) {
+        console.log("Completed all puts: " + dbPutsIssued);
+      }
     };
     putReqValues.onerror = function(event) {
+      dbPutsCompleted++;
       console.log("putReqValues error: " + event.target.error.name + ": " + event.target.error.message);
+      if(dbPutsCompleted === dbPutsIssued) {
+        console.log("Completed all puts: " + dbPutsIssued);
+      }
     };
-    // console.log("Issued putReqValues for database '" + databaseName + "'");
+    
+    dbPutsIssued++;
+    if(dbPutsIssued % 1000 === 0) {
+      console.log("Issued " + dbPutsIssued + " putReqValues for database '" + databaseName + "'");
+    }
 
     var putReqCount = transactionPrimesCounts.objectStore("primes.counts").put(resultsCount);
     putReqCount.onsuccess = function(event) {
+      dbPutsCompleted++;
       var id = event.target.result;
       if(id % 1000 === 0) {
         console.log("putReqCount result: " + event.target.result);
       }
+      if(dbPutsCompleted === dbPutsIssued) {
+        console.log("Completed all puts: " + dbPutsIssued);
+      }
     };
     putReqCount.onerror = function(event) {
+      dbPutsCompleted++;
       console.log("putReqCount error: " + event.target.error.name + ": " + event.target.error.message);
+      if(dbPutsCompleted === dbPutsIssued) {
+        console.log("Completed all puts: " + dbPutsIssued);
+      }
     };
     // console.log("Issued putReqCount (" + resultsCount + ") for database '" + databaseName + "'");
+    dbPutsIssued++;
+    if(dbPutsIssued % 1000 === 0) {
+      console.log("Issued " + dbPutsIssued + " putReqValues for database '" + databaseName + "'");
+    }
 }
 
 function dbReport() {
