@@ -7,41 +7,34 @@
 
 importScripts('primes.js');
 
-var top_num = 4294967291; // 1000000000; // 4294967291; // 2147483647; // 1000000000;
-var cnt = 0;
+var topNum = 4294967291; // 1000000000; // 4294967291; // 2147483647; // 1000000000;
 var timeStart = new Date().getTime();
 
-postMessage('initialising: top_num = ' + top_num);
-
-var results;
-var cntLast = 0;
-for(var indic = 0; indic < 2; indic++) {
-  if(indic === 1) {
-     results = new Uint32Array(cnt);
-  }
 var p = 1;
-cnt = 0;
-var gen = new SoEPgClass();
-while ((p = gen.next()) <= top_num) {
-  if(indic === 1) {
-    results[cnt] = p;
-  }
-  cnt++;
-  if(cnt % 1000000 == 0) {
-    var percent = Math.floor(100 * p / top_num);
-    var elapsed = Math.floor(((new Date()).getTime() - timeStart) / 1000);
-    var is_big = (2147483647 < gen.lowi*2);
-    postMessage({is_big: is_big, lowi: gen.page_index_start, elapsed:elapsed, cnt:cnt, percent:percent, top_num:top_num, p:p});
-  }
-}
-var percent = Math.floor(100 * p / top_num);
-var elapsed = Math.floor(((new Date()).getTime() - timeStart) / 1000);
-var is_big = (2147483647 < gen.lowi*2);
-postMessage({is_big: is_big, lowi: gen.page_index_start, elapsed:elapsed, cnt:cnt, percent:percent, top_num:top_num, p:p});
-}
+var cnt = 0;
+var resultsIndex = 0;
+var resultsBufSize = 4096;
+var resultsBuffer = new Uint32Array(resultsBufSize);
 
-dbDelete();
-writeToDb();
+var gen = new SoEPgClass();
+while ((p = gen.next()) <= topNum) {
+  resultsBuffer[resultsIndex] = p;
+  cnt++;
+  resultsIndex++;
+  if(resultsIndex % resultsBufSize == 0) {
+    var percent = Math.floor(100 * p / topNum);
+    var elapsed = Math.floor(((new Date()).getTime() - timeStart) / 1000);
+    postMessage({elapsed:elapsed, resultsBuffer:resultsBuffer, resultsCount:resultsIndex, cnt:cnt, percent:percent, topNum:topNum, p:p});
+    resultsBuffer.fill(0);
+    resultsIndex = 0;
+  }
+}
+var percent = Math.floor(100 * p / topNum);
+var elapsed = Math.floor(((new Date()).getTime() - timeStart) / 1000);
+postMessage({elapsed:elapsed, resultsBuffer:resultsBuffer, resultsCount:resultsIndex, cnt:cnt, percent:percent, topNum:topNum, p:p});
+
+// dbDelete();
+// writeToDb();
 var databaseName = "MyTestDatabase";
 
 function writeToDb() {

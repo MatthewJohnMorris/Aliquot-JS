@@ -13,7 +13,9 @@
   <script type="text/javascript" src="../src/timer.js"></script>
   <script type="text/javascript" src="../src/db.js"></script>
 
-  <a class="btn-blue" onclick="dbOpen(); return false;" href="">Open DB</a> 
+  <a class="btn-blue" onclick="dbCreateOrOpen(); return false;" href="">Open DB</a> 
+
+  <a class="btn-blue" onclick="dbReport(); return false;" href="">Report On DB</a> 
 
   <a class="btn-blue" onclick="dbClose(); return false;" href="">Close DB</a> 
 
@@ -46,11 +48,13 @@ function stopPrimesGeneration() {
 }
 
 function ourUpdater(x) {
-    var elem = document.getElementById("progress-bar");
-    var percent = x.percent;
-    elem.style.width = percent + '%';
-    var message = x.percent + "% sec: " + x.elapsed + " found: " + x.cnt;
-    document.getElementById("progress-label").innerHTML = message;
+  var elem = document.getElementById("progress-bar");
+  var percent = x.percent;
+  elem.style.width = percent + '%';
+  var message = x.percent + "% sec: " + x.elapsed + " rc: " + x.resultsCount + " found: " + x.cnt;
+  document.getElementById("progress-label").innerHTML = message;
+
+  dbStore(x.resultsBuffer, x.resultsCount);
 
 //  document.getElementById("timer-value").innerHTML = x;
 }
