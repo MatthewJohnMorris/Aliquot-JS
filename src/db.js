@@ -32,16 +32,16 @@ function dbCreateOrOpenImpl() {
   };
 }
 
-function dbStore(resultsValues, resultsCount) {
+function dbStore(resultsValues, resultsCount, callbackIfComplete) {
   try {
-    dbStoreImpl(resultsValues, resultsCount);
+    dbStoreImpl(resultsValues, resultsCount, callbackIfComplete);
   }
   catch(e) {
     console.log("Exception: " + e);
   }
 }
 
-function dbStoreImpl(resultsValues, resultsCount) {
+function dbStoreImpl(resultsValues, resultsCount, callbackIfComplete) {
     var transactionPrimesValues = db.transaction(["primes.values"], "readwrite");
     var transactionPrimesCounts = db.transaction(["primes.counts"], "readwrite");
     var putReqValues = transactionPrimesValues.objectStore("primes.values").put(resultsValues);
@@ -51,6 +51,7 @@ function dbStoreImpl(resultsValues, resultsCount) {
       //   console.log("putReqValues result: " + event.target.result);
       if(dbPutsCompleted === dbPutsIssued) {
         console.log("Completed all puts: " + dbPutsIssued);
+        callbackIfComplete();
       }
     };
     putReqValues.onerror = function(event) {
@@ -76,6 +77,7 @@ function dbStoreImpl(resultsValues, resultsCount) {
       }
       if(dbPutsCompleted === dbPutsIssued) {
         console.log("Completed all puts: " + dbPutsIssued);
+        callbackIfComplete();
       }
     };
     putReqCount.onerror = function(event) {

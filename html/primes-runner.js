@@ -29,7 +29,7 @@ while ((p = gen.next()) <= topNum) {
     resultsIndex = 0;
   }
 }
-var percent = Math.floor(100 * p / topNum);
+var percent = 100;
 var elapsed = Math.floor(((new Date()).getTime() - timeStart) / 1000);
 postMessage({elapsed:elapsed, resultsBuffer:resultsBuffer, resultsCount:resultsIndex, cnt:cnt, percent:percent, topNum:topNum, p:p});
 

@@ -25,7 +25,7 @@
 
   <p id="calc-primes-result">Result</p>
 
-  <p id="timer-value">Timer</p>
+  <p id="generation-status">Generator Status</p>
 
 <div class="progress-back">
   <div class="progress-bar" id="progress-bar">
@@ -37,16 +37,27 @@
 <button onclick="stopPrimesGeneration()">Stop Primes Generation</button>
 <script>
 var timerPrimesGeneration;
+var primesGenerated = 0;
 function startPrimesGeneration() {
+  document.getElementById("generation-status").innerHTML = "Generation STARTED";
   if(typeof(timerPrimesGeneration) !== "undefined") {
     return;
   }
   timerPrimesGeneration = Timer.start(ourUpdater);
+  primesGenerated = 0;
 }
 
 function stopPrimesGeneration() {
+  document.getElementById("generation-status").innerHTML = "Generation STOPPED";
   Timer.stop(timerPrimesGeneration);
   timerPrimesGeneration = undefined;
+  primesGenerated = 0;
+}
+
+function callbackIfComplete() {
+  if(primesGenerated === 1) {
+    document.getElementById("generation-status").innerHTML = "Generation COMPLETE";
+  }
 }
 
 function ourUpdater(x) {
@@ -56,7 +67,11 @@ function ourUpdater(x) {
   var message = x.percent + "% sec: " + x.elapsed + " rc: " + x.resultsCount + " found: " + x.cnt;
   document.getElementById("progress-label").innerHTML = message;
 
-  dbStore(x.resultsBuffer, x.resultsCount);
+  dbStore(x.resultsBuffer, x.resultsCount, callbackIfComplete);
+
+  if(x.percent === 100) {
+    primesGenerated = 1;
+  }
 
 //  document.getElementById("timer-value").innerHTML = x;
 }
