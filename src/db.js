@@ -14,15 +14,15 @@ function dbCreateOrOpen() {
 
 function dbCreateOrOpenImpl() {
   var request = indexedDB.open(databaseName, 1);
-  request.onerror = function(event) {
-    console.log("indexedDB.open error: " + event.target.error.name + ": " + event.target.error.message);
-  };
   setDefaultHandlers(request, "indexedDB.open(" + databaseName + ")");
   request.onsuccess = function(event) {
     db = event.target.result;
     dbPutsIssued = 0;
     dbPutsCompleted = 0;
     console.log("opened database '" + databaseName + "'");
+  };
+  request.onerror = function(event) {
+    console.log("indexedDB.open error: " + event.target.error.name + ": " + event.target.error.message);
   };
   request.onupgradeneeded = function(event) { 
     var dbUpgrade = event.target.result;
