@@ -4,7 +4,15 @@ var dbPutsIssued = 0;
 var dbPutsCompleted = 0;
 
 function dbCreateOrOpen() {
-try {
+  try {
+    dbCreateOrOpenImpl();
+  }
+  catch(e) {
+    console.log("Exception: " + e);
+  }
+}
+
+function dbCreateOrOpenImpl() {
   var request = indexedDB.open(databaseName, 1);
   request.onerror = function(event) {
     console.log("indexedDB.open error: " + event.target.error.name + ": " + event.target.error.message);
@@ -23,13 +31,17 @@ try {
     console.log("onupgradeneeded for database '" + databaseName + "'");
   };
 }
-catch(e) {
-  console.log("Exception: " + e);
-}
-}
 
 function dbStore(resultsValues, resultsCount) {
-try {
+  try {
+    dbStoreImpl(resultsValues, resultsCount);
+  }
+  catch(e) {
+    console.log("Exception: " + e);
+  }
+}
+
+function dbStoreImpl(resultsValues, resultsCount) {
     var transactionPrimesValues = db.transaction(["primes.values"], "readwrite");
     var transactionPrimesCounts = db.transaction(["primes.counts"], "readwrite");
     var putReqValues = transactionPrimesValues.objectStore("primes.values").put(resultsValues);
@@ -79,13 +91,17 @@ try {
       console.log("Issued " + dbPutsIssued + " putReqValues for database '" + databaseName + "'");
     }
 }
-catch(e) {
-  console.log("Exception: " + e);
-}
-}
 
 function dbReport() {
-try {
+  try {
+    dbReportImpl();
+  }
+  catch(e) {
+    console.log("Exception: " + e);
+  }
+}
+
+function dbReportImpl() {
   var transactionPrimesCounts = db.transaction(["primes.counts"], "readonly");
   var objStorePrimesCounts = transactionPrimesCounts.objectStore("primes.counts");
   var total = 0;
@@ -107,14 +123,18 @@ try {
     }
   };
   console.log("Issued openCursor() for database '" + databaseName + "'");
-}
-catch(e) {
-  console.log("Exception: " + e);
-}
 }
 
 function dbRead() {
-try {
+  try {
+    dbReadImpl();
+  }
+  catch(e) {
+    console.log("Exception: " + e);
+  }
+}
+
+function dbReadImpl() {
   var transactionPrimesCounts = db.transaction(["primes.counts"], "readonly");
   var objStorePrimesCounts = transactionPrimesCounts.objectStore("primes.counts");
   var total = 0;
@@ -137,19 +157,15 @@ try {
   };
   console.log("Issued openCursor() for database '" + databaseName + "'");
 }
-catch(e) {
-  console.log("Exception: " + e);
-}
-}
 
 function dbClose() {
-try {
-  db.close();
-  console.log("closed database '" + databaseName + "'");
-}
-catch(e) {
-  console.log("Exception: " + e);
-}
+  try {
+    db.close();
+    console.log("closed database '" + databaseName + "'");
+  }
+  catch(e) {
+    console.log("Exception: " + e);
+  }
 }
 
 function setDefaultHandlers(req, opDesc) {
