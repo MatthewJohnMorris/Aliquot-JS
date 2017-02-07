@@ -4,10 +4,12 @@ var dbPutsIssued = 0;
 var dbPutsCompleted = 0;
 
 function dbCreateOrOpen() {
+try {
   var request = indexedDB.open(databaseName, 1);
   request.onerror = function(event) {
     console.log("indexedDB.open error: " + event.target.error.name + ": " + event.target.error.message);
   };
+  setDefaultHandlers(request, "indexedDB.open(" + databaseName + ")");
   request.onsuccess = function(event) {
     db = event.target.result;
     dbPutsIssued = 0;
@@ -21,12 +23,17 @@ function dbCreateOrOpen() {
     console.log("onupgradeneeded for database '" + databaseName + "'");
   };
 }
+catch(e) {
+  console.log("Exception: " + e);
+}
+}
 
 function dbStore(resultsValues, resultsCount) {
-
+try {
     var transactionPrimesValues = db.transaction(["primes.values"], "readwrite");
     var transactionPrimesCounts = db.transaction(["primes.counts"], "readwrite");
     var putReqValues = transactionPrimesValues.objectStore("primes.values").put(resultsValues);
+    setDefaultHandlers(putReqValues, "primes.values.put(" + databaseName + ")");
     putReqValues.onsuccess = function(event) {
       dbPutsCompleted++;
       //   console.log("putReqValues result: " + event.target.result);
@@ -48,6 +55,7 @@ function dbStore(resultsValues, resultsCount) {
     }
 
     var putReqCount = transactionPrimesCounts.objectStore("primes.counts").put(resultsCount);
+    setDefaultHandlers(putReqCount, "primes.counts.put(" + databaseName + ")");
     putReqCount.onsuccess = function(event) {
       dbPutsCompleted++;
       var id = event.target.result;
@@ -71,13 +79,19 @@ function dbStore(resultsValues, resultsCount) {
       console.log("Issued " + dbPutsIssued + " putReqValues for database '" + databaseName + "'");
     }
 }
+catch(e) {
+  console.log("Exception: " + e);
+}
+}
 
 function dbReport() {
+try {
   var transactionPrimesCounts = db.transaction(["primes.counts"], "readonly");
   var objStorePrimesCounts = transactionPrimesCounts.objectStore("primes.counts");
   var total = 0;
   var i = 0;
   var reqCursor = objStorePrimesCounts.openCursor();
+  setDefaultHandlers(reqCursor, "primes.counts.openCursor(" + databaseName + ")");
   reqCursor.onsuccess = function(event) {
     var cursor = reqCursor.result || event.result || event.target.result;
     if (cursor) {
@@ -92,33 +106,21 @@ function dbReport() {
       console.log("Cursors: " + i + ", Total: " + total);
     }
   };
-  reqCursor.onerror = function(event) {
-    console.log("Cursor error: " + event.target.error.name + ": " + event.target.error.message);
-  };
-  reqCursor.oncomplete = function(event) {
-    console.log("Cursor oncomplete");
-  }
-  reqCursor.onabort = function(event) {
-    console.log("Cursor onabort"); 
-  }
-  reqCursor.onblocked = function(event) {
-    console.log("Cursor onblocked");
-  }
-  reqCursor.onversionchange = function(event) {
-    console.log("Cursor onversionchange");
-  }
-  reqCursor.onclose = function(event) {
-    console.log("Cursor onclose");
-  }
   console.log("Issued openCursor() for database '" + databaseName + "'");
+}
+catch(e) {
+  console.log("Exception: " + e);
+}
 }
 
 function dbRead() {
+try {
   var transactionPrimesCounts = db.transaction(["primes.counts"], "readonly");
   var objStorePrimesCounts = transactionPrimesCounts.objectStore("primes.counts");
   var total = 0;
   var i = 0;
   var reqCursor = objStorePrimesCounts.openCursor();
+  setDefaultHandlers(reqCursor, "primes.counts.openCursor(" + databaseName + ")");
   reqCursor.onsuccess = function(event) {
     var cursor = reqCursor.result || event.result || event.target.result;
     if (cursor) {
@@ -133,55 +135,50 @@ function dbRead() {
       console.log("Cursors: " + i + ", Total: " + total);
     }
   };
-  reqCursor.onerror = function(event) {
-    console.log("Cursor error: " + event.target.error.name + ": " + event.target.error.message);
-  };
-  reqCursor.oncomplete = function(event) {
-    console.log("Cursor oncomplete");
-  }
-  reqCursor.onabort = function(event) {
-    console.log("Cursor onabort"); 
-  }
-  reqCursor.onblocked = function(event) {
-    console.log("Cursor onblocked");
-  }
-  reqCursor.onversionchange = function(event) {
-    console.log("Cursor onversionchange");
-  }
-  reqCursor.onclose = function(event) {
-    console.log("Cursor onclose");
-  }
   console.log("Issued openCursor() for database '" + databaseName + "'");
+}
+catch(e) {
+  console.log("Exception: " + e);
+}
 }
 
 function dbClose() {
+try {
   db.close();
   console.log("closed database '" + databaseName + "'");
+}
+catch(e) {
+  console.log("Exception: " + e);
+}
+}
+
+function setDefaultHandlers(req, opDesc) {
+  req.onsuccess = function () {
+    console.log("onsuccess: " + opDesc);
+  };
+  req.onerror = function (event) {
+    console.log("onerror: " + opDesc + event.target.error.name + ": " + event.target.error.message);
+  };
+  req.onblocked = function () {
+    console.log("onblocked: " + opDesc);
+  };
+  req.oncomplete = function(event) {
+    console.log("oncomplete: " + opDesc);
+  }
+  req.onabort = function(event) {
+    console.log("onabort: " + opDesc);
+  }
+  req.onversionchange = function(event) {
+    console.log("onversionchange: " + opDesc);
+  }
+  req.onclose = function(event) {
+    console.log("onclose: " + opDesc);
+  }
 }
 
 function dbDelete() {
   var req = indexedDB.deleteDatabase(databaseName);
-  req.onsuccess = function () {
-    console.log("onsuccess: deleteDatabase(" + databaseName + ")");
-  };
-  req.onerror = function () {
-    console.log("onerror: deleteDatabase(" + databaseName + ")");
-  };
-  req.onblocked = function () {
-    console.log("onblocked: deleteDatabase(" + databaseName + ")");
-  };
-  reqCursor.oncomplete = function(event) {
-    console.log("oncomplete: deleteDatabase(" + databaseName + ")");
-  }
-  reqCursor.onabort = function(event) {
-    console.log("onabort: deleteDatabase(" + databaseName + ")");
-  }
-  reqCursor.onversionchange = function(event) {
-    console.log("onversionchange: deleteDatabase(" + databaseName + ")");
-  }
-  reqCursor.onclose = function(event) {
-    console.log("onclose: deleteDatabase(" + databaseName + ")");
-  }
+  setDefaultHandlers(req, "deleteDatabase(" + databaseName + ")");
   console.log("Issued deleteDatabase() for database '" + databaseName + "'");
 }
 
